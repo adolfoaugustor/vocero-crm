@@ -1446,3 +1446,186 @@ maestra y como zip, igual que la 2.2.0 y la 2.3.0.
 `oxscyojlwrwvhvookx8ikd8c`, CRM `dpmhlzuxtcwfnr6jkinra2o6` y Postgres
 `e5bjsmt2ahbzc7pkfkldnmud`). El borrado por el MCP pidió confirmación y quedó
 rechazado; queda pendiente de Kevin, que puede hacerlo desde el panel.
+
+## 2026-10-22 — 039: responder citando un mensaje
+
+**PR**: [#138](https://github.com/kevinrivm/vocero-crm/pull/138), rama
+`039-responder-citando`. Spec, plan y tareas antes del código (`a4d8ca4`).
+Puerto de una función que ya usa un CRM de cliente; aquí se montó otra vez
+sobre `main` (2.0), sin sus datos.
+
+### Qué quedó
+
+- Migración `0022_responder_citando`: `message.reply_to_wa_message_id`
+  (`text`, nula). Guarda el `wamid` citado; se resuelve al leer, por lote.
+- «Responder» en la bandeja, vista previa cancelable en el compositor y la
+  cita arriba de la burbuja, con salto al original. Lo citado que no está en
+  el CRM se ve como «Mensaje no disponible».
+- Envío con `context.message_id` en texto, adjuntos, ubicación y contactos;
+  422 `reply_unavailable` sin enviar si la cita no es posible.
+- Solo WhatsApp (capacidad `quoteReplies`). `/api/bot/*` y el despacho no
+  cambian; el DTO del mensaje gana `quotable` y `replyTo`.
+
+### Cómo se probó
+
+| Qué | Resultado |
+|---|---|
+| `typecheck`, `lint`, `test`, `build` | Verdes con banderas apagadas y con `CHANNELS` + `AGENDA`. 1 192 unitarias (17 nuevas) |
+| `scripts/e2e-responder-citando.mjs` (Playwright, wa-mock, base desechable) | 21/21 |
+| `scripts/e2e-selftest.mjs` con el cerebro falso y todo encendido | 280/280 |
+
+### Qué no se probó
+
+- **En vivo**, con un número real: no se tocó ningún WhatsApp ni ninguna
+  instancia. Queda pendiente de verificación humana: mandar una respuesta
+  citada desde la bandeja y ver la burbuja contextual en el teléfono, y citar
+  desde el teléfono y verla en la bandeja.
+- Que Meta dibuje la cita de un original de más de ~30 días (D10): no se
+  puede reproducir con el mock.
+
+## 2026-10-22 — 040: ligas clicables en los mensajes
+
+**PR**: [#139](https://github.com/kevinrivm/vocero-crm/pull/139), rama
+`040-ligas-clicables`. Spec ligera antes del código (`9efb1cd`). Puerto de una
+función que ya usa un CRM de cliente; las pruebas se reescribieron con
+ejemplos neutros (las del original traían datos de ese negocio).
+
+### Qué quedó
+
+- `splitLinks` (`src/lib/linkify.ts`) parte el texto en tramos de texto y de
+  liga; `LinkedText` los pinta. Se usa en el texto de la burbuja y en el pie
+  de un adjunto.
+- Solo `http(s)://` y `www.`; la pestaña nueva sin `opener` ni `referer`.
+- Sin migración ni cambios de contrato.
+
+### Cómo se probó
+
+| Qué | Resultado |
+|---|---|
+| `typecheck`, `lint`, `test`, `build` | Verdes con banderas apagadas y con `CHANNELS` + `AGENDA`. 1 188 unitarias (13 nuevas) |
+| `scripts/e2e-ligas-clicables.mjs` (Playwright, wa-mock, base desechable) | 18/18: texto, pie, `javascript:`/`mailto:` sin enlace, saliente con `www.`, pestaña nueva, recarga |
+
+### Qué no se probó
+
+- **En vivo**, con un número real: no se tocó ningún WhatsApp ni ninguna
+  instancia. Pendiente de verificación humana (una liga real en un mensaje
+  del teléfono).
+- El aspecto del enlace no se revisó a ojo: el arnés comprueba el DOM, no
+  toma capturas. El contraste del color descansa en
+  `contraste-temas.test.ts` (≥ 4,5:1 sobre la burbuja saliente y el fondo).
+  Pendiente de un vistazo humano en los dos temas.
+
+## 2026-10-22 — 041: selector de emojis en el compositor
+
+**PR**: [#140](https://github.com/kevinrivm/vocero-crm/pull/140), rama
+`041-selector-emojis`. Spec ligera antes del código (`f9f3ad8`). Puerto de una
+función que ya usa un CRM de cliente, montada otra vez sobre `main`.
+
+### Qué quedó
+
+- `EmojiPicker` en la caja de texto del compositor; catálogo, búsqueda sin
+  acentos e inserción en el cursor en `src/lib/emojis.ts` (puro, sin
+  dependencias ni peticiones).
+- Elegir no envía; Escape, la X o un clic fuera cierran; deshabilitado
+  mientras sube un adjunto. Abrirlo cierra el panel de ubicación o contacto.
+- Sin migración ni cambios de contrato.
+
+### Cómo se probó
+
+| Qué | Resultado |
+|---|---|
+| `typecheck`, `lint`, `test`, `build` | Verdes con banderas apagadas y con `CHANNELS` + `AGENDA`. 1 190 unitarias (15 nuevas) |
+| `scripts/e2e-selector-emojis.mjs` (Playwright, wa-mock, base desechable) | 33/33 |
+| Capturas del panel en escritorio y en 390 px, tema claro | Revisadas a ojo: cabe, no tapa el campo |
+
+### Qué no se probó
+
+- **Tema oscuro**: el panel usa los tokens `popover`; no se vio a ojo.
+- **En vivo**, con un número real: no se tocó ningún WhatsApp ni ninguna
+  instancia. Pendiente de verificación humana (que los emojis compuestos
+  lleguen igual al teléfono).
+- Cómo se dibujan los emojis depende de la fuente del sistema del operador;
+  solo se vio en Chromium sobre Windows.
+
+## 2026-10-22 — 042: pegar y reenviar imágenes en WhatsApp
+
+**PR**: [#141](https://github.com/kevinrivm/vocero-crm/pull/141), rama
+`042-pegar-reenviar-imagenes`. Spec ligera antes del código (`81d4625`).
+Puerto de una función que ya usa un CRM de cliente; se volvió a montar sobre
+la 2.0 y el almacenamiento de la 037.
+
+### Qué quedó
+
+- Pegar una imagen en el campo la deja como adjunto; validación compartida en
+  `src/lib/imagen-adjunta.ts`, atada a `MEDIA_LIMITS.image`.
+- «Reenviar imagen» en el hilo y su diálogo; ruta interna
+  `POST /api/conversations/[id]/messages/forward-image` que solo nombra el
+  mensaje de origen.
+- **Diferencias con el CRM de origen, decididas aquí**: los destinos y la
+  ruta van por la capacidad del canal (`outboundMedia` / `composer.media`), no
+  por el nombre «whatsapp»; el binario se lee con `readMediaFile` (disco o
+  bucket); una imagen entrante que no se había bajado se baja en vez de
+  rechazarse, y por eso el botón aparece en toda imagen.
+- Se corrigió de paso el compositor: leía mal el error de la API y decía
+  «Error 413» en vez del motivo.
+- Se encontró y corrigió al probar: el hilo y el compositor, hermanos, tenían
+  la misma `key` (el origen la traía igual). El arnés ahora falla con avisos
+  de React de llaves repetidas.
+
+### Cómo se probó
+
+| Qué | Resultado |
+|---|---|
+| `typecheck`, `lint`, `test`, `build` | Verdes con banderas apagadas y con `CHANNELS` + `AGENDA`. 1 202 unitarias (27 nuevas) |
+| `scripts/e2e-imagenes.mjs` (Playwright, wa-mock, base desechable) | 42/42 |
+| `scripts/e2e-selftest.mjs` con el cerebro falso y todo encendido | 280/280 |
+| Capturas del hilo y del diálogo, escritorio, tema claro | Revisadas a ojo |
+
+### Qué no se probó
+
+- **`MEDIA_STORE=bucket`**: el E2E corrió con disco. La lectura pasa por
+  `readMediaFile`, que la 037 ya prueba con los dos almacenes, pero el reenvío
+  desde un bucket no se ejercitó.
+- **Destino de Instagram, Messenger o TikTok** en la UI: crear esa
+  conversación exige conectar Zernio; el 422 lo cubre la unitaria.
+- **Tema oscuro** del diálogo, a ojo.
+- **En vivo**, con un número real: no se tocó ningún WhatsApp ni ninguna
+  instancia. Pendiente de verificación humana (pegar una captura y reenviar
+  una foto de un cliente a otro, y verlas llegar al teléfono).
+
+## 2026-10-22 — 043: arrastrar una imagen al chat
+
+**PR**: [#142](https://github.com/kevinrivm/vocero-crm/pull/142), rama
+`043-arrastrar-imagen`, **encima de la 042** (#141): reutiliza su validación y
+el mismo compositor. Spec ligera antes del código (`b2d1d96`). Puerto de una
+función que ya usa un CRM de cliente, montada otra vez sobre `main`.
+
+### Qué quedó
+
+- La conversación entera acepta una imagen soltada; el indicador cuenta la
+  profundidad para no parpadear y solo reacciona a archivos.
+- Soltar adjunta (nunca envía), con la validación de la 042.
+- No se acepta mientras sube un adjunto, con la ventana cerrada, en canales
+  sin adjuntos ni con el diálogo de reenvío abierto.
+- **Diferencia con el CRM de origen, decidida aquí**: soltar un archivo fuera
+  del chat ya no abre el archivo en la pestaña (el origen solo lo evitaba
+  dentro del área, y el borrador se perdía).
+- El hilo pasa a renderizarse dentro del compositor.
+
+### Cómo se probó
+
+| Qué | Resultado |
+|---|---|
+| `typecheck`, `lint`, `test`, `build` | Verdes con banderas apagadas y con `CHANNELS` + `AGENDA`. 1 202 unitarias |
+| `scripts/e2e-arrastrar-imagen.mjs` (Playwright, wa-mock, base desechable) | 30/30 |
+| `scripts/e2e-imagenes.mjs` (la 042) sobre esta rama | 42/42 |
+| Captura del indicador, escritorio, tema claro | Revisada a ojo |
+
+### Qué no se probó
+
+- **Un arrastre real desde el explorador de archivos**: el arnés manda los
+  eventos con un `DataTransfer` que lleva archivos; el sistema operativo no
+  interviene. Tampoco Firefox ni Safari.
+- **Tema oscuro** del indicador, a ojo.
+- **En vivo**, con un número real: no se tocó ningún WhatsApp ni ninguna
+  instancia. Pendiente de verificación humana.
