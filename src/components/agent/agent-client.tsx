@@ -1,5 +1,7 @@
 "use client";
 
+import { systemText } from "@/lib/i18n";
+
 import { useI18n } from "@/components/i18n-provider";
 
 import { useCallback, useEffect, useState } from "react";
@@ -99,7 +101,7 @@ export function AgentClient() {
 
   async function cargarPreset() {
     const ok = window.confirm(
-      tr("Cargar el rol «{v0}» reemplaza las instrucciones y las reglas de escalado, y enciende todas sus herramientas. ¿Continuar?", {v0: ROLES.calificador.etiqueta})
+      tr("Cargar el rol «{v0}» reemplaza las instrucciones y las reglas de escalado, y enciende todas sus herramientas. ¿Continuar?", {v0: systemText(tr.locale, ROLES.calificador.etiqueta)})
     );
     if (!ok) return;
     await fetch("/api/agent/profile/preset", {
@@ -181,7 +183,7 @@ export function AgentClient() {
                 : "w-full text-right text-xs text-muted-foreground"
             }
           >
-            {switchError ?? tr("Se enciende cuando conectes tu agente.")}
+            {(switchError ? systemText(tr.locale, switchError) : null) ?? tr("Se enciende cuando conectes tu agente.")}
           </p>
         )}
       </header>
@@ -199,7 +201,7 @@ export function AgentClient() {
             {aiMensaje ? tr("Tu agente no puede pensar") : tr("Tu agente no tiene con qué pensar")}
           </p>
           <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-            {aiMensaje ??
+            {(aiMensaje ? systemText(tr.locale, aiMensaje) : null) ??
               tr("Piensa a través del CRM con la llave de Ajustes → IA: elige el proveedor, el modelo y pega tu llave, sin reiniciar nada.")}{" "}
             {tr("(Si tu agente usa su propia llave, puedes ignorar este aviso.)")}</p>
           <Link
@@ -257,12 +259,12 @@ function RolSection({
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <CardTitle>
-              {tr("Rol: ")}{rol.etiqueta}
+              {tr("Rol: ")}{systemText(tr.locale, rol.etiqueta)}
             </CardTitle>
-            <CardDescription>{rol.descripcion}</CardDescription>
+            <CardDescription>{systemText(tr.locale, rol.descripcion)}</CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={onPreset}>
-            {tr("Cargar el rol ")}{rol.etiqueta}
+            {tr("Cargar el rol ")}{systemText(tr.locale, rol.etiqueta)}
           </Button>
         </div>
       </CardHeader>
@@ -271,13 +273,13 @@ function RolSection({
           {visibles.map((h) => (
             <li key={h.clave} className="flex items-start justify-between gap-3 rounded-md border p-3">
               <div>
-                <p className="text-sm font-medium">{h.etiqueta}</p>
-                <p className="text-xs text-muted-foreground">{h.descripcion}</p>
+                <p className="text-sm font-medium">{systemText(tr.locale, h.etiqueta)}</p>
+                <p className="text-xs text-muted-foreground">{systemText(tr.locale, h.descripcion)}</p>
               </div>
               <Switch
                 checked={h.fija ? true : encendida(h.clave)}
                 disabled={h.fija === true}
-                label={h.etiqueta}
+                label={systemText(tr.locale, h.etiqueta)}
                 onCheckedChange={(on) => cambiar(h.clave, on)}
               />
             </li>

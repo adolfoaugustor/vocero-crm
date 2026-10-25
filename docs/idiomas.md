@@ -1,8 +1,8 @@
 # Idiomas de la interfaz
 
-Vocero 2.1 permite español (`es`) y portugués de Brasil (`pt-BR`).
+Este fork de Vocero 2.5 permite español (`es`) y portugués de Brasil (`pt-BR`).
 En **Ajustes → Marca → Idioma predeterminado**, el propietario elige el idioma
-del negocio. El selector del lateral y del acceso permite elegir un idioma
+del negocio. El selector del menú de cuenta, del cajón móvil y del acceso permite elegir un idioma
 para este navegador o volver al predeterminado del negocio.
 
 La prioridad es cookie válida → idioma de la empresa → español. La cookie
@@ -55,3 +55,9 @@ La validación funcional se ejecuta con `node --env-file=.env.i18n scripts/e2e-i
 sobre una instancia local descartable con `WA_MOCK_ENABLED=true`.
 El guion crea cuentas de prueba y datos demo, revisa escritorio/móvil y guarda
 capturas en `.tmp/i18n-screens/`; no conecta canales ni envía mensajes.
+
+## Integración con 2.5.0
+
+El selector de idioma está en el menú **Tu cuenta** del riel de escritorio y en el cajón de navegación del teléfono. La preferencia de idioma y la apariencia se guardan por separado. Se conservan el idioma de empresa, la cookie del navegador y el contenido original de contactos y mensajes.
+
+Se incorporan traducciones para Apariencia, respuestas rápidas, notas internas, grabadora, filtros, notificaciones y atajos. La actualización desde 2.1 añade las migraciones oficiales 0023–0025; no modifica las credenciales ni el perfil del agente. Para desplegar este fork con portugués hay que construir su código, no descargar únicamente la imagen oficial.

@@ -7,6 +7,8 @@ import { useSearchParams } from "next/navigation";
 import { ChevronLeft, PanelRight } from "lucide-react";
 import { cn, formatPhone } from "@/lib/utils";
 import { ContactAvatar } from "@/components/avatar";
+import type { NotaDto } from "@/lib/notas";
+import type { EventoHiloDto } from "@/lib/eventos-hilo";
 import type {
   ConversationDto,
   MessageDto,
@@ -18,6 +20,10 @@ import { useEvents } from "@/components/use-events";
 import { ConversationList } from "./conversation-list";
 import { MessageThread } from "./message-thread";
 import { Composer } from "./composer";
+import {
+  EVENTO_ABRIR_CONVERSACION,
+  setConversacionAbierta,
+} from "@/components/avisos-de-mensajes";
 import { citaDe } from "./helpers";
 import { ContactPanel } from "./contact-panel";
 
@@ -60,6 +66,10 @@ export function InboxClient({
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [messages, setMessages] = useState<MessageDto[]>([]);
+  // 050 — Las notas internas de la conversación abierta.
+  const [notas, setNotas] = useState<NotaDto[]>([]);
+  // 054 — Cambios de etapa y traspaso, para pintarlos en el hilo.
+  const [eventos, setEventos] = useState<EventoHiloDto[]>([]);
   const [pending, setPending] = useState<PendingOut[]>([]);
   // 039: el mensaje al que se está respondiendo citando.
   const [replyTo, setReplyTo] = useState<MessageDto | null>(null);
@@ -85,6 +95,11 @@ export function InboxClient({
   }, []);
   const selectedIdRef = useRef<string | null>(null);
   selectedIdRef.current = selectedId;
+  // 045 — El aviso sonoro no suena por la conversación que ya estás mirando.
+  useEffect(() => {
+    setConversacionAbierta(selectedId);
+    return () => setConversacionAbierta(null);
+  }, [selectedId]);
   const lastFetchRef = useRef<string | null>(null);
   const tmpSeq = useRef(0);
   // Los envíos salen en fila: el compositor ya no espera, pero WhatsApp debe
@@ -109,6 +124,20 @@ export function InboxClient({
     if (selectedIdRef.current === conversationId) setMessages(data.messages);
   }, []);
 
+  const refetchNotas = useCallback(async (conversationId: string) => {
+    const res = await fetch(`/api/conversations/${conversationId}/notes`).catch(() => null);
+    if (!res?.ok) return;
+    const data = (await res.json()) as { notas: NotaDto[] };
+    if (selectedIdRef.current === conversationId) setNotas(data.notas);
+  }, []);
+
+  const refetchEventos = useCallback(async (conversationId: string) => {
+    const res = await fetch(`/api/conversations/${conversationId}/eventos`).catch(() => null);
+    if (!res?.ok) return;
+    const data = (await res.json()) as { eventos: EventoHiloDto[] };
+    if (selectedIdRef.current === conversationId) setEventos(data.eventos);
+  }, []);
+
   useEffect(() => {
     void refetchConversations();
   }, [refetchConversations]);
@@ -117,15 +146,19 @@ export function InboxClient({
     (id: string) => {
       setSelectedId(id);
       setMessages([]);
+      setNotas([]);
+      setEventos([]);
       setReplyTo(null);
       void refetchMessages(id);
+      void refetchNotas(id);
+      void refetchEventos(id);
       void fetch(`/api/conversations/${id}`, {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ markRead: true }),
       });
     },
-    [refetchMessages]
+    [refetchMessages, refetchNotas, refetchEventos]
   );
 
   /** 026 — Saca una conversación eliminada de todo lo que esta pestaña recuerda. */
@@ -135,6 +168,8 @@ export function InboxClient({
     if (selectedIdRef.current === id) {
       setSelectedId(null);
       setMessages([]);
+      setNotas([]);
+      setEventos([]);
       setReplyTo(null);
     }
   }, []);
@@ -142,6 +177,21 @@ export function InboxClient({
   // Enlace directo desde Contactos/Pipeline: /inbox?contact=<id>
   const searchParams = useSearchParams();
   const contactParam = searchParams.get("contact");
+  // 056 — Al tocar un aviso del sistema: /inbox?conversation=<id>. Se aplica
+  // una vez por aviso; si no, cada refresco de la lista volvería a saltar ahí.
+  const conversationParam = searchParams.get("conversation");
+  const [pedida, setPedida] = useState<string | null>(null);
+  useEffect(() => setPedida(conversationParam), [conversationParam]);
+  useEffect(() => {
+    const alPedir = (e: Event) => setPedida((e as CustomEvent<string>).detail);
+    window.addEventListener(EVENTO_ABRIR_CONVERSACION, alPedir);
+    return () => window.removeEventListener(EVENTO_ABRIR_CONVERSACION, alPedir);
+  }, []);
+  useEffect(() => {
+    if (!pedida || !conversations?.some((c) => c.id === pedida)) return;
+    setPedida(null);
+    if (selectedIdRef.current !== pedida) select(pedida);
+  }, [pedida, conversations, select]);
   useEffect(() => {
     if (!contactParam || selectedIdRef.current) return;
     const match = conversations?.find((c) => c.contact.id === contactParam);
@@ -149,6 +199,15 @@ export function InboxClient({
   }, [contactParam, conversations, select]);
 
   useEvents({
+    // 050 — Se relee la lista: `puedeBorrar` depende de quién mira.
+    onNoteNew: ({ conversationId }) => {
+      if (selectedIdRef.current === conversationId) void refetchNotas(conversationId);
+    },
+    onNoteDeleted: ({ conversationId, noteId }) => {
+      if (selectedIdRef.current === conversationId) {
+        setNotas((prev) => prev.filter((n) => n.id !== noteId));
+      }
+    },
     onMessageNew: ({ conversationId, message }) => {
       if (selectedIdRef.current === conversationId) {
         const m = message as MessageDto;
@@ -164,6 +223,14 @@ export function InboxClient({
       void refetchConversations();
       // Un entrante nuevo puede crear/mover el lead: refresca el panel.
       setDetailRev((v) => v + 1);
+    },
+    onMessageMedia: ({ conversationId, messageId, media }) => {
+      if (selectedIdRef.current !== conversationId) return;
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId ? { ...m, media: media as MessageDto["media"] } : m
+        )
+      );
     },
     onMessageStatus: ({ conversationId, messageId, status, error }) => {
       if (selectedIdRef.current !== conversationId) return;
@@ -181,6 +248,8 @@ export function InboxClient({
     },
     onConversationUpdated: () => {
       void refetchConversations();
+      // 054 — Cambió la etapa o la IA: el hilo pinta el evento en vivo.
+      if (selectedIdRef.current) void refetchEventos(selectedIdRef.current);
       // El agente movió de etapa o cambió el handoff: refresca el panel en vivo.
       setDetailRev((v) => v + 1);
     },
@@ -194,7 +263,10 @@ export function InboxClient({
     onReconnect: () => {
       // Catch-up tras reconexión (contrato sse.md): refetch completo.
       void refetchConversations();
-      if (selectedIdRef.current) void refetchMessages(selectedIdRef.current);
+      if (selectedIdRef.current) {
+        void refetchMessages(selectedIdRef.current);
+        void refetchEventos(selectedIdRef.current);
+      }
       setDetailRev((v) => v + 1);
     },
   });
@@ -339,12 +411,14 @@ export function InboxClient({
   );
 
   return (
-    <div className="flex h-full">
+    // 061 · D3 — En escritorio, la lista, el hilo y el panel son tarjetas
+    // separadas sobre el marco.
+    <div className="flex h-full lg:gap-[var(--hueco)]">
       {/* Móvil: una columna a la vez. La lista cede la pantalla completa al
           hilo en cuanto hay conversación elegida (patrón maestro-detalle). */}
       <section
         className={cn(
-          "w-full shrink-0 overflow-hidden border-r md:w-[300px] lg:w-[360px]",
+          "w-full shrink-0 overflow-hidden md:w-[300px] md:border-r lg:w-[340px] lg:overflow-visible lg:border-r-0",
           selected && "max-md:hidden"
         )}
       >
@@ -359,13 +433,13 @@ export function InboxClient({
 
       <section
         className={cn(
-          "flex min-w-0 flex-1 flex-col",
+          "flex min-w-0 flex-1 flex-col lg:gap-[var(--hueco)]",
           !selected && "max-md:hidden"
         )}
       >
         {selected ? (
           <>
-            <header className="flex items-center justify-between gap-1 border-b bg-background px-2 py-2.5 md:px-4">
+            <header className="flex items-center justify-between gap-1 border-b bg-background px-2 py-2.5 md:px-4 lg:tarjeta lg:border-b-0 lg:px-5 lg:py-3">
               {/* Volver a la lista: en móvil el hilo ocupa toda la pantalla. */}
               <button
                 onClick={() => setSelectedId(null)}
@@ -381,7 +455,7 @@ export function InboxClient({
                   size="md"
                 />
                 <div className="min-w-0">
-                  <p className="flex min-w-0 items-center gap-1.5 text-[15px] font-bold leading-tight tracking-tight">
+                  <p className="flex min-w-0 items-center gap-1.5 text-[15px] font-bold leading-tight tracking-tight lg:text-[18px] lg:font-semibold">
                     {multiChannel && <ChannelBadge channel={selected.channel} />}
                     <span className="truncate">{selected.contact.name}</span>
                   </p>
@@ -436,9 +510,35 @@ export function InboxClient({
                   void refetchMessages(selectedIdRef.current);
                 void refetchConversations();
               }}
+              onNota={async (texto) => {
+                const id = selected.id;
+                const res = await fetch(`/api/conversations/${id}/notes`, {
+                  method: "POST",
+                  headers: { "content-type": "application/json" },
+                  body: JSON.stringify({ texto }),
+                }).catch(() => null);
+                if (!res?.ok) {
+                  const d = (await res?.json().catch(() => null)) as { error?: { message?: string } } | null;
+                  return d?.error?.message ?? tr("No se pudo guardar la nota. Revisa la conexión.");
+                }
+                const { nota } = (await res.json()) as { nota: NotaDto };
+                if (selectedIdRef.current === id) {
+                  setNotas((prev) => (prev.some((n) => n.id === nota.id) ? prev : [...prev, nota]));
+                }
+                return null;
+              }}
             >
               <MessageThread
                 messages={thread}
+                notas={notas}
+                eventos={eventos}
+                onBorrarNota={async (n) => {
+                  if (!window.confirm(tr("¿Borrar esta nota interna?"))) return;
+                  const res = await fetch(`/api/conversations/${n.conversationId}/notes/${n.id}`, {
+                    method: "DELETE",
+                  }).catch(() => null);
+                  if (res?.ok) setNotas((prev) => prev.filter((x) => x.id !== n.id));
+                }}
                 contactName={selected.contact.name}
                 // 039: citar solo donde el canal lo permite y se puede escribir
                 // texto libre (con la ventana cerrada solo salen plantillas).
@@ -456,7 +556,7 @@ export function InboxClient({
             </Composer>
           </>
         ) : (
-          <div className="thread-bg flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
+          <div className="thread-bg flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center lg:tarjeta">
             <p className="font-serif text-[24px] italic leading-tight text-text-2">
               {tr("Elige una conversación para ver el hilo")}</p>
             <p className="kicker">{tr("Bandeja · tiempo real")}</p>
@@ -476,13 +576,13 @@ export function InboxClient({
 
       <section
         className={cn(
-          "shrink-0 overflow-hidden border-l transition-[width] duration-200",
+          "shrink-0 overflow-hidden border-l transition-[width] duration-200 xl:tarjeta xl:border-l-0",
           // Debajo de xl no hay ancho para una tercera columna: el panel se
           // vuelve un cajón que entra desde la derecha, encima del hilo.
           "max-xl:fixed max-xl:inset-y-0 max-xl:right-0 max-xl:z-40 max-xl:w-auto max-xl:bg-popover max-xl:transition-transform",
           panelOpen && selected
             ? "w-[320px] max-xl:translate-x-0 max-xl:shadow-pop"
-            : "w-0 border-l-0 max-xl:translate-x-full"
+            : "w-0 border-l-0 max-xl:translate-x-full xl:hidden"
         )}
       >
         {selected && (

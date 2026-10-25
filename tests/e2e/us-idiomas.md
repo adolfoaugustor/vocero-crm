@@ -22,3 +22,14 @@ Instancia local con mocks y base descartable. No usar cuentas ni números reales
 - Confirmar que no hay errores de hidratación ni de ejecución en consola.
 
 Arnés: scripts/e2e-idiomas.mjs. Capturas: .tmp/i18n-screens/.
+
+## Regresión de la actualización 2.5
+
+- El selector de escritorio se abre desde Tu cuenta; en el teléfono, desde el menú.
+- Apariencia y Respuestas rápidas se recorren en ambos idiomas.
+- Elegir Noite, recargar y aplicar al equipo mantiene pt-BR y el idioma de empresa.
+- Un tema propio sin contraste muestra el error traducido y bloquea Aplicar.
+- Crear una respuesta rápida preserva literalmente el contenido y `{nombre}`.
+- Simular un fallo de red al guardar muestra el error en portugués y permite reintentar.
+- Ctrl+K encuentra las pantallas por su nombre traducido.
+- Sin internet aparece el aviso en portugués y desaparece al recuperar la conexión.

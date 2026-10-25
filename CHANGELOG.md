@@ -5,20 +5,217 @@ sigue el SemVer del [README](README.md#versiones): una menor trae funciones
 nuevas y actualizar es redesplegar. Desde 1.4.0, cada tag `vX.Y.Z` publica la
 imagen `ghcr.io/kevinrivm/vocero-crm:X.Y.Z`.
 
-## 2.1.0 — 2026-10-22
+## Fork pt-BR sobre 2.5.0 — 2026-10-25
 
 Interfaz en español y portugués de Brasil. El propietario elige el idioma
 predeterminado en Ajustes → Marca y cada navegador puede elegir otro en el
 acceso o el menú. La primera renderización, ayuda, controles y formatos
 regionales usan la preferencia resuelta.
 
-### Actualizar desde 2.0.0
+### Actualizar este fork desde 2.1
 
-Actualizar la imagen basta: no hay migración nueva ni configuración obligatoria.
-Las instalaciones existentes conservan español. Moneda, huso, datos guardados,
+Construir la imagen desde este código para incluir las traducciones. Se integran
+las migraciones oficiales 0023–0025 (webhooks, respuestas rápidas y notas internas);
+el contenedor las aplica al arrancar. En desarrollo, ejecutar `pnpm db:migrate`.
+El selector de idioma sigue en el menú de cuenta del escritorio y en el cajón
+móvil. Apariencia, respuestas rápidas, filtros, grabación de voz, notificaciones
+y atajos incorporan su catálogo en portugués. Nea mantiene su versión propia 2.0.2.
+
+Las instalaciones existentes conservan su idioma. Moneda, huso, datos guardados,
 plantillas de WhatsApp e idioma del agente permanecen independientes.
 La API de marca acepta locale opcional; clientes antiguos conservan el valor
 guardado. Véase [Idiomas](docs/idiomas.md).
+
+## 2.5.0 — 2026-10-24
+
+Un Vocero nuevo por fuera, y a gusto de cada quien. Actualizar es
+redesplegar con la etiqueta `2.5.0`: no hay migraciones ni variables nuevas.
+Nea no cambia.
+
+### Nuevo
+
+- **Diseño de tarjetas** (061): la app son tarjetas separadas, muy redondas,
+  sobre un fondo suave.
+  - En la computadora, un **riel de iconos** reemplaza al menú lateral. La
+    sección activa va rellena y la Bandeja muestra su número; abajo están la
+    campana, Ajustes y tu cuenta (tema, avisos, instalar app, cerrar sesión y
+    versión).
+  - El buscador va en su propia cápsula.
+  - El cliente escribe en **burbujas oscuras** y tus respuestas van en
+    pastillas claras.
+  - Escribes en una cápsula, con el **botón de enviar redondo** aparte.
+  - Letra nueva: Urbanist.
+- **Ajustes → Apariencia** (062):
+  - **8 temas**: Menta (por defecto), Noche, Vocero, Vocero oscuro, Papel,
+    Carbón, Medianoche y Alto contraste.
+  - Un **tema propio** de tres colores, que avisa si algo no se lee.
+  - **Letra**: Urbanist, Archivo, Inter o IBM Plex Sans.
+  - **Tamaño**: chico, normal o grande.
+  - **Densidad**: compacta, normal o espaciosa.
+  - Todo **se guarda solo para cada persona**, y el dueño o un administrador
+    puede **aplicarlo a todo el equipo**.
+  - El sol y la luna saltan a la pareja del tema (Menta ⇄ Noche).
+  - El acento de tu marca se queda en todos los temas.
+
+### Cambió
+
+- El tema claro de siempre ahora es **Menta** y el oscuro, **Noche**. El azul
+  de la 2.x sigue disponible como «Vocero» y «Vocero oscuro». Quien ya usaba
+  el oscuro con el botón de antes ve Noche.
+- En el celular, el menú se abre igual que antes, pero ya sin la barra azul
+  marino.
+
+## 2.4.0 — 2026-10-23
+
+Avisos aunque no estés mirando, una bandeja que no se queda callada cuando se
+cae la conexión, la historia del cliente en su chat y atajos de teclado.
+Actualizar es redesplegar con la etiqueta `2.4.0`: no hay migraciones ni
+variables nuevas. Nea no cambia.
+
+### Nuevo
+
+- **Avisos del sistema** (056):
+  - «Activar avisos» en el menú;
+  - cuando escribe un cliente y no estás mirando Vocero, sale una
+    notificación con su nombre y el mensaje, y al tocarla se abre esa
+    conversación;
+  - la campana los silencia igual que el sonido.
+
+  Sin push: con Vocero cerrado no llega nada. En Windows, Chrome necesita
+  tener activadas sus notificaciones en Configuración → Sistema →
+  Notificaciones.
+- **«Sin conexión»** (056):
+  - una banda avisa «Sin internet» o «Sin conexión en tiempo real», con
+    «Reintentar ahora»;
+  - el tiempo real se reconecta solo (también tras un redespliegue) y la
+    bandeja trae lo que llegó mientras tanto.
+- **Eventos en el hilo** (054): en su lugar por hora, «Entró al embudo en
+  Nuevo», «Pasó a Interesado · por Ana», «Pasó a Perdido · Le pareció caro» y
+  «La IA se pausó: el cliente pidió un humano».
+- **Atajos de teclado** (055):
+  - **Ctrl+K** (⌘K) para ir a una pantalla o a una conversación;
+  - **?** para la ayuda;
+  - en la Bandeja, **Alt+J / Alt+K** para la conversación siguiente o
+    anterior, **/** para el buscador, **Alt+R** para responder y **Alt+N**
+    para una nota interna.
+- La Bandeja abre una conversación con `/inbox?conversation=<id>`.
+
+### Cambió
+
+- El panel del contacto nombra también el traspaso por hostilidad.
+
+## 2.3.0 — 2026-10-23
+
+Reenviar cualquier mensaje y, en el celular, responder deslizando. Actualizar
+es redesplegar con la etiqueta `2.3.0`: no hay migraciones ni variables
+nuevas. Nea no cambia.
+
+### Nuevo
+
+- **Reenviar cualquier mensaje** (059), no solo imágenes:
+  - el texto sale como texto;
+  - imagen, video, documento y audio salen como archivo nuevo, y una nota de
+    voz sigue siendo nota de voz.
+
+  El cliente lo recibe como un mensaje nuevo: la Cloud API no permite la
+  marca «Reenviado». Endpoint: `POST /api/conversations/:id/messages/forward`.
+- **En el celular** (059):
+  - deslizar un mensaje hacia cualquier lado lo cita;
+  - mantenerlo presionado abre un menú con Responder, Reenviar y Copiar
+    texto.
+
+### Cambió
+
+- **En la computadora**, los iconos «Responder» y «Reenviar» aparecen al pasar
+  el ratón por el mensaje. Ya no está el botón «Reenviar imagen» dentro de la
+  burbuja.
+- **En el celular**, se quitó la flecha junto a cada burbuja, que se leía como
+  «reenviar».
+
+### Arreglado
+
+- En la 2.3.0-rc.1, la hora de envío se salía de la burbuja en audios,
+  documentos y ubicaciones.
+
+## 2.2.0 — 2026-10-23
+
+Lo que aprendimos de las mejores bandejas abiertas, hecho a la manera de
+Vocero. Actualizar es redesplegar con la etiqueta `2.2.0`: las tres
+migraciones nuevas (0023 a 0025) se aplican solas al arrancar y no hay
+variables nuevas. Nea no cambia.
+
+### Nuevo
+
+- **Webhook a prueba de fallos** (047). Cada aviso de Meta o de Zernio se
+  guarda antes de procesarlo; si algo falla, se reintenta solo (30 s, 2 min,
+  10 min, 1 h y 6 h). Lo que agota los intentos se ve en Ajustes → WhatsApp,
+  con un botón **Reintentar**, y `/api/health` cuenta los pendientes y los
+  agotados.
+- **Vocero en el celular** (048). Se instala como app desde el navegador (fila
+  «Instalar app» del menú), con su icono y abriendo en la Bandeja. Necesita
+  HTTPS.
+- **Respuestas rápidas con «/»** (049). Al teclear `/` en el compositor sale
+  un menú con las respuestas guardadas; se administran en Ajustes → Respuestas
+  rápidas.
+- **Notas internas** (050). El equipo deja notas en el hilo, intercaladas con
+  los mensajes y en otro color. El cliente nunca las ve y llegan en tiempo
+  real a quien tenga el chat abierto.
+- **Borrador por conversación** (051). Lo que dejas a medio escribir sigue
+  ahí al volver a ese chat, guardado en el navegador.
+- **Filtros de la Bandeja** (052). Las pestañas «Todas | No leídas» y un solo
+  botón **Filtrar** con la etapa, «Por vencer» (a la ventana del canal le
+  quedan 2 h o menos) y «De anuncios». Cada filtro puesto se ve como etiqueta
+  con ✕, y cada conversación avisa «Vence en 1 h 20 min».
+
+### Cambió
+
+- La etapa y «De anuncios» salieron de la barra de la Bandeja y viven en el
+  menú «Filtrar» (052).
+
+### Arreglado
+
+- Si el archivo de un adjunto ya no está en el disco (un despliegue sin
+  volumen en `/data`), el CRM lo vuelve a bajar de Meta en vez de dar 410,
+  mientras Meta lo conserve. Igual, monta el volumen: es lo que guarda los
+  adjuntos.
+
+## 2.1.0 — 2026-10-22
+
+Una bandeja que se usa como WhatsApp. Actualizar es redesplegar con la
+etiqueta `2.1.0`: no hay migraciones ni variables nuevas. Va con
+[Nea 2.0.2](https://github.com/kevinrivm/nea-agent/blob/main/CHANGELOG.md),
+que transcribe las notas de voz pensando por el CRM sin configurar nada.
+
+### Nuevo
+
+- **Responder citando** un mensaje, como en WhatsApp (039).
+- **Ligas clicables** en los mensajes (040).
+- **Selector de emojis** en el compositor (041).
+- **Pegar y reenviar imágenes** (042) y **arrastrar una imagen** al chat (043).
+- **Notas de voz** (044): con la caja vacía el botón graba; se puede escuchar
+  antes de mandar. Salen a WhatsApp como nota de voz (Ogg/Opus); lo que graba
+  Chrome o Edge (WebM) se convierte en el servidor sin recodificar, con código
+  propio.
+- **Reproductor de audio** propio para todo audio del hilo (044): la onda del
+  audio, tocar o arrastrar para ir a un momento y velocidad 1× · 1.5× · 2×.
+- **Avisos de mensaje nuevo** (045): suena al llegar un mensaje del cliente, en
+  cualquier pantalla (campana en el menú para silenciar), y la pestaña cuenta
+  los chats sin leer: «(3) Vocero — CRM…».
+
+### Cambió
+
+- El compositor ya no ofrece enviar **ubicación ni contacto** (045). El
+  servidor los sigue aceptando por la API y la bandeja sigue mostrando los que
+  llegan.
+
+### Arreglado
+
+- Un adjunto que llegaba con la conversación abierta se quedaba en
+  «descargando…» hasta recargar (044).
+- Una conversación corta con una foto abría en el primer mensaje en vez del
+  último (045).
+- `audio/ogg; codecs=opus` (lo que graba Firefox) se rechazaba como tipo no
+  reconocido al adjuntarlo (044).
 
 ## 2.0.0 — 2026-10-20
 
