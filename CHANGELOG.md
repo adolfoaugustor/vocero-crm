@@ -5,6 +5,29 @@ sigue el SemVer del [README](README.md#versiones): una menor trae funciones
 nuevas y actualizar es redesplegar. Desde 1.4.0, cada tag `vX.Y.Z` publica la
 imagen `ghcr.io/kevinrivm/vocero-crm:X.Y.Z`.
 
+## 2.5.3 — 2026-10-28
+
+Una versión de seguridad: **actualiza cuanto antes**. Actualizar es
+redesplegar con la etiqueta `2.5.3`: no hay migraciones ni variables nuevas.
+Nea no cambia. Si construyes desde el código, reconstruye la imagen (la base
+de Node también cambia).
+
+### Seguridad
+
+- **Next.js 15.5.28 y sharp 0.35.5** (#171). Cierran un RCE sin autenticación
+  en el optimizador de imágenes con SVG (CVE-2026-96889 /
+  GHSA-2464-fhr4-w9xw) y un DoS en Server Actions (GHSA-p3m5-59mp-jv5r).
+- **Node 22.23.4** como imagen base, fijada en las tres etapas del
+  `Dockerfile`. Cierra el fallo del decodificador Brotli (CVE-2026-111497) y
+  el resto de la tanda del 21-oct.
+- **drizzle-orm 0.45.4** (y drizzle-kit 0.31.11). Cierra la inyección SQL en
+  identificadores (CVE-2026-39356); el código de Vocero no la exponía.
+- **zod 4.6.7** dentro de better-auth (GHSA-mrhx-c7xc-m3w5). El zod 3 de la
+  app no tiene parche: sus arrays van detrás de sesión o de `BOT_API_KEY`, y
+  migrar a zod 4 irá aparte.
+
+Gracias a Denys (@revudev) por el PR.
+
 ## 2.5.2 — 2026-10-27
 
 Una Bandeja rápida con muchos mensajes. Actualizar es redesplegar con la
