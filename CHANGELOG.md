@@ -5,6 +5,38 @@ sigue el SemVer del [README](README.md#versiones): una menor trae funciones
 nuevas y actualizar es redesplegar. Desde 1.4.0, cada tag `vX.Y.Z` publica la
 imagen `ghcr.io/kevinrivm/vocero-crm:X.Y.Z`.
 
+## 2.6.0 — 2026-10-29
+
+Plantillas que funcionan con el split de Meta de 2026, y las que creaste fuera
+de Vocero ya aparecen. Actualizar es redesplegar con la etiqueta `2.6.0`: la
+migración `0026` se aplica sola al arrancar y no hay variables nuevas. Nea no
+cambia. Sin más pasos, la instancia sigue igual que en la 2.5; para usar la
+Cuenta de mensajes, sigue
+[migrar.md](specs/065-cuenta-de-mensajes/migrar.md).
+
+### Nuevo
+
+- **La Cuenta de mensajes** (065). Desde 2026 Meta separa la cuenta de
+  WhatsApp (el número) de la Cuenta de mensajes (plantillas y pago).
+  - Ajustes → WhatsApp tiene un campo opcional para su ID. Si lo dejas vacío,
+    Vocero intenta encontrarla.
+  - Las plantillas se crean y se sincronizan ahí, y el webhook se registra en
+    las dos cuentas. Sin él, en las cuentas ya separadas los mensajes
+    entrantes podían no llegar.
+  - El aviso de estado de una plantilla llega por cualquiera de las dos.
+  - Al desconectar, se quita también de la Cuenta de mensajes.
+- **Sincronizar importa las plantillas creadas fuera de Vocero** (065):
+  `hello_world` y las del Administrador de WhatsApp. Solo las que Vocero sabe
+  enviar: cuerpo con variables, encabezado de texto fijo, pie y botones sin
+  variables. Las de encabezado con imagen, URL dinámica o autenticación se
+  quedan fuera. Recorre todas las páginas, no solo la primera.
+
+### Arreglado
+
+- **Crear una plantilla ya no falla con «Invalid parameter»** en una cuenta
+  partida (Meta responde `#100`/`2388339` en la cuenta de WhatsApp). Si aún
+  no guardaste la Cuenta de mensajes, el error dice dónde agregarla.
+
 ## 2.5.3 — 2026-10-28
 
 Una versión de seguridad: **actualiza cuanto antes**. Actualizar es
