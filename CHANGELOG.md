@@ -25,6 +25,33 @@ imagen `ghcr.io/kevinrivm/vocero-crm:X.Y.Z`.
   lo responde en las cuentas partidas, y el registro del webhook se cortaba
   antes de poner el override del número.
 
+## 2.7.0 — 2026-10-29
+
+Conectar el número con la ventana oficial de Meta. Actualizar es redesplegar con
+la etiqueta `2.7.0`: no hay migraciones. Las variables nuevas son opcionales y,
+sin ellas, todo queda como en la 2.6. Nea no cambia.
+
+### Nuevo
+
+- **«Conectar con Meta» en Ajustes → WhatsApp** (#187, spec 066). Abre el
+  Embedded Signup v4 de Meta (Facebook Login for Business) y deja el número
+  conectado sin pegar credenciales: canjea el `code`, comprueba que el número
+  sea de la WABA, lo registra si hace falta (PIN del dueño o uno generado que
+  se muestra una sola vez), guarda las credenciales cifradas y registra el
+  webhook en la Cuenta de WhatsApp y en la Cuenta de mensajes. Solo para
+  `owner`/`admin`. Sin coexistencia por ahora: si Meta la ofrece, se avisa y no
+  se guarda nada. Guía del panel en [`docs/embedded-signup.md`](docs/embedded-signup.md).
+- **Variables** `META_APP_ID` y `META_EMBEDDED_CONFIG_ID`, más `META_APP_SECRET`
+  de la misma app. Si falta cualquiera, el botón no aparece y queda el
+  formulario manual.
+
+### Arreglado
+
+- **El `#100/2388339` al suscribir la app en la Cuenta de WhatsApp ya no es
+  error** si la Cuenta de mensajes respondió bien (#187). Meta dejó de aceptar
+  `subscribed_apps` en la Cuenta de WhatsApp después del split; en la 2.6
+  guardar la conexión mostraba un aviso rojo aunque el webhook funcionara.
+
 ## 2.6.1 — 2026-10-29
 
 Mantenimiento. Actualizar es redesplegar con la etiqueta `2.6.1`: no hay
