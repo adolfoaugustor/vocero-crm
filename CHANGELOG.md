@@ -5,6 +5,26 @@ sigue el SemVer del [README](README.md#versiones): una menor trae funciones
 nuevas y actualizar es redesplegar. Desde 1.4.0, cada tag `vX.Y.Z` publica la
 imagen `ghcr.io/kevinrivm/vocero-crm:X.Y.Z`.
 
+## Sin publicar
+
+### Nuevo
+
+- **«Conectar con Meta» (Embedded Signup v4)** en Ajustes → WhatsApp (spec
+  066). Con `META_APP_ID`, `META_EMBEDDED_CONFIG_ID` y `META_APP_SECRET` en la
+  instancia, quien administra la cuenta autoriza su WhatsApp en la ventana
+  oficial de Meta y Vocero registra el número (con un PIN generado si no
+  escribes uno), guarda las credenciales cifradas y registra el webhook en la
+  Cuenta de WhatsApp, en la de mensajes y en el número. Sin esas variables
+  todo queda como antes. Pasos del panel de Meta en
+  [docs/embedded-signup.md](docs/embedded-signup.md). Sin migración.
+
+### Arreglado
+
+- **`#100/2388339` al suscribir la app en la Cuenta de WhatsApp ya no es
+  fatal** si la Cuenta de mensajes quedó suscrita: desde el 28-oct-2026 Meta
+  lo responde en las cuentas partidas, y el registro del webhook se cortaba
+  antes de poner el override del número.
+
 ## 2.6.1 — 2026-10-29
 
 Mantenimiento. Actualizar es redesplegar con la etiqueta `2.6.1`: no hay
