@@ -500,7 +500,7 @@ function CreateForm({
           <Textarea
             id="tpl-body"
             rows={4}
-            placeholder="Hola {{1}}, te confirmo tu sesión el {{2}} a las {{3}}. Si necesitas moverla, responde a este mensaje."
+            placeholder={tr("Hola {{1}}, te confirmo tu sesión el {{2}} a las {{3}}. Si necesitas moverla, responde a este mensaje.")}
             value={body}
             onChange={(e) => setBody(e.target.value)}
           />

@@ -33,3 +33,24 @@ Arnés: scripts/e2e-idiomas.mjs. Capturas: .tmp/i18n-screens/.
 - Simular un fallo de red al guardar muestra el error en portugués y permite reintentar.
 - Ctrl+K encuentra las pantallas por su nombre traducido.
 - Sin internet aparece el aviso en portugués y desaparece al recuperar la conexión.
+
+## Regresión de la integración 2.7
+
+- Primer registro con cookie pt-BR: etapas Novo, Em conversa, Interessado,
+  Cliente y Perdido, con los mismos tipos open/won/lost; instalaciones ya
+  creadas conservan sus etapas.
+- Editar un booleano de la ficha por el valor y por el lápiz: Sim → Não y
+  Não → Sim conservan boolean en la API. El texto libre "Sim" sigue siendo texto.
+- Cuenta de mensajes: campo, ayuda y avisos en español y portugués; suscripción
+  automática, descubrimiento e importación paginada mantienen el flujo oficial.
+- Embedded Signup: ejecutar scripts/e2e-embedded-signup.mjs con E2E_LOCALE=es
+  y E2E_LOCALE=pt-BR. Meta y su SDK son simulados; se valida el locale del SDK,
+  autorización, PIN, actualización del banner y rechazos sin reemplazar datos.
+- El placeholder traducido de las plantillas conserva {{1}}, {{2}} y {{3}}.
+- Teléfonos brasileños con formato de presentación; API, enlaces y datos
+  canónicos no cambian. Los nombres enviados por Zernio siguen intactos.
+
+El arnés de idiomas requiere una base vacía en cada ejecución para comprobar
+el primer registro. E2E_SEED_CLI=true permite probar el build de producción
+sin abrir rutas de desarrollo. E2E_TIMEOUT_MS ajusta únicamente la espera del
+navegador en Embedded Signup cuando la compilación local es lenta.

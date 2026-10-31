@@ -1,5 +1,6 @@
-> Fork em português do Brasil atualizado para o Vocero CRM **2.5.0**. Para usar as traduções deste fork, construa a imagem a partir deste código; a imagem oficial não contém estas alterações. O agente Nea usa versão independente (**2.0.2**).
-> A versão 2.5.0 inclui temas em Configurações → Aparência, respostas rápidas, notas internas, gravação de voz, notificações e atalhos de teclado. Veja o [histórico completo](CHANGELOG.md) e a [configuração de idiomas](docs/idiomas.md).
+> Fork em português do Brasil atualizado para o Vocero CRM **2.7.0**. Para usar as traduções deste fork, construa a imagem a partir deste código; a imagem oficial não contém estas alterações. O agente Nea usa versão independente (**2.0.2**).
+> A base 2.7.0 inclui Aparência, Conta de mensagens do WhatsApp, importação de templates, fundo ilustrado e conexão oficial com Meta. Veja o [histórico completo](CHANGELOG.md) e a [configuração de idiomas](docs/idiomas.md).
+> Ao atualizar da 2.5, aplique a migração oficial 0026 (`pnpm db:migrate` no desenvolvimento; automática no contêiner). O botão Conectar com Meta exige `META_APP_ID`, `META_EMBEDDED_CONFIG_ID` e `META_APP_SECRET`; sem essas variáveis, a conexão manual continua disponível. Veja o [guia oficial](docs/embedded-signup.md).
 
 # Vocero CRM
 
@@ -298,7 +299,7 @@ Meta e do seu provedor LLM opcional.
 ## Instalação (~15 minutos)
 
 Cada versão é publicada como imagem Docker:
-`ghcr.io/kevinrivm/vocero-crm:<versão>` (p. ex. `2.5.0`). Instalar a partir da
+`ghcr.io/kevinrivm/vocero-crm:<versão>` (p. ex. `2.7.0`). Instalar a partir da
 imagem é o caminho recomendado: seu servidor baixa a imagem em vez de
 compilá-la. Compilar do código continua funcionando, e é o que você precisa num
 VPS ARM ou se o seu fork muda o código.
@@ -349,7 +350,7 @@ código se não a encontrar nem no registro nem na sua máquina. Então:
   Compose pode rodar a oficial em vez das suas mudanças.
 
 O Caddy emite o certificado HTTPS sozinho. Verifique com
-`https://crm.seudominio.com/api/health` → `{"ok":true,"version":"2.5.0",…}`.
+`https://crm.seudominio.com/api/health` → `{"ok":true,"version":"2.7.0",…}`.
 
 ### Outras plataformas: Render, Fly e Railway
 
@@ -358,7 +359,7 @@ publicada, montam `/data` e monitoram `/api/health`; cada um declara o que a
 plataforma permite declarar e documenta, em comentários, o que fica de mão. A
 imagem vem fixada à versão (um teste o exige). Verifique igual ao de cima:
 `curl -s https://<sua-url>/api/health` →
-`{"ok":true,"version":"2.5.0",…,"mediaWritable":true}`.
+`{"ok":true,"version":"2.7.0",…,"mediaWritable":true}`.
 
 **Render** — [`render.yaml`](render.yaml) é um Blueprint completo: serviço web
 a partir da imagem, Postgres gerenciado, disco de 1 GB em `/data`, healthcheck
@@ -390,7 +391,7 @@ domínio e as variáveis são criados pela CLI, com os comandos exatos escritos 
 próprio arquivo (`railway add --database postgres`,
 `railway volume add --mount-path /data`, `railway domain --port 3000`,
 `railway variable set …`, `railway up`). Para a imagem publicada sem build:
-`railway add --image ghcr.io/kevinrivm/vocero-crm:2.5.0`, e então o healthcheck
+`railway add --image ghcr.io/kevinrivm/vocero-crm:2.7.0`, e então o healthcheck
 é fixado no painel. O Railway declarou obsoleto esse formato em favor do seu
 Infrastructure as Code (`.railway/railway.ts`); continua lendo-o até
 2026-12-01.

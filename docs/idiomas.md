@@ -1,6 +1,6 @@
 # Idiomas de la interfaz
 
-Este fork de Vocero 2.5 permite español (`es`) y portugués de Brasil (`pt-BR`).
+Este fork de Vocero 2.7 permite español (`es`) y portugués de Brasil (`pt-BR`).
 En **Ajustes → Marca → Idioma predeterminado**, el propietario elige el idioma
 del negocio. El selector del menú de cuenta, del cajón móvil y del acceso permite elegir un idioma
 para este navegador o volver al predeterminado del negocio.
@@ -56,8 +56,20 @@ sobre una instancia local descartable con `WA_MOCK_ENABLED=true`.
 El guion crea cuentas de prueba y datos demo, revisa escritorio/móvil y guarda
 capturas en `.tmp/i18n-screens/`; no conecta canales ni envía mensajes.
 
-## Integración con 2.5.0
+## Integración con 2.7.0
 
 El selector de idioma está en el menú **Tu cuenta** del riel de escritorio y en el cajón de navegación del teléfono. La preferencia de idioma y la apariencia se guardan por separado. Se conservan el idioma de empresa, la cookie del navegador y el contenido original de contactos y mensajes.
 
-Se incorporan traducciones para Apariencia, respuestas rápidas, notas internas, grabadora, filtros, notificaciones y atajos. La actualización desde 2.1 añade las migraciones oficiales 0023–0025; no modifica las credenciales ni el perfil del agente. Para desplegar este fork con portugués hay que construir su código, no descargar únicamente la imagen oficial.
+Se incorporan traducciones para Apariencia, respuestas rápidas, notas internas, grabadora, filtros, notificaciones y atajos. La actualización desde 2.1 añade las migraciones oficiales 0023–0026; no modifica las credenciales ni el perfil del agente. Para desplegar este fork con portugués hay que construir su código, no descargar únicamente la imagen oficial.
+
+
+La integración conserva las funciones 061–066: riel de navegación, Apariencia,
+fondo ilustrado, lista compartida, Cuenta de mensajes y Embedded Signup v4.
+Sin las tres variables opcionales de Meta, solo se muestra la conexión manual.
+La migración 0026 agrega una columna opcional; no reemplaza credenciales.
+
+Los booleanos de la ficha se presentan como «Sim/Não» en portugués y siguen
+siendo booleanos al guardarse. Solo las empresas nuevas reciben etapas iniciales
+en el idioma elegido al registrarse; no se renombran etapas existentes.
+Los teléfonos brasileños se formatean únicamente en pantalla: la base, las API
+y los enlaces conservan el número canónico. El idioma no cambia moneda ni huso.

@@ -308,8 +308,10 @@ export function Composer({
       <div
         role="region"
         aria-label={tr("Chat: adjuntar imagen")}
-        // 061 — El hilo con su compositor es una tarjeta en escritorio.
-        className="relative flex min-h-0 flex-1 flex-col bg-chat lg:tarjeta lg:overflow-hidden"
+        // 061 — El hilo con su compositor es una tarjeta en escritorio. El
+        // fondo (con sus dibujos) es de la tarjeta: hilo y compositor van
+        // transparentes encima, así los dibujos no se cortan entre los dos.
+        className="thread-bg relative flex min-h-0 flex-1 flex-col bg-chat lg:tarjeta lg:overflow-hidden"
         onDragEnter={(e) => {
           if (!isFileDrag(e)) return;
           e.preventDefault();
@@ -499,7 +501,7 @@ export function Composer({
 
   if (onNota && modo === "nota") {
     return withDropZone(
-      <div className="bg-chat px-[18px] pb-3.5 pt-2">
+      <div className="px-[18px] pb-3.5 pt-2">
         {pestanas}
         <div
           data-modo="nota"
@@ -552,7 +554,7 @@ export function Composer({
 
   if (!conversation.windowOpen && conversation.channel === "tiktok") {
     return withDropZone(
-      <div className="bg-chat px-[18px] py-3.5">
+      <div className="px-[18px] py-3.5">
         {pestanas}
         <div className="flex items-start gap-2 rounded-md border border-warning-soft bg-warning-tint p-3 text-sm text-warning-text">
           <Clock3 className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.7} />
@@ -574,7 +576,7 @@ export function Composer({
   const canal = CHANNEL_LABEL[conversation.channel];
   if (!conversation.windowOpen && human && !human.open) {
     return withDropZone(
-      <div className="bg-chat px-[18px] py-3.5">
+      <div className="px-[18px] py-3.5">
         {pestanas}
         <div
           data-window="closed"
@@ -594,7 +596,7 @@ export function Composer({
 
   if (!conversation.windowOpen && !human) {
     return withDropZone(
-      <div className="bg-chat px-[18px] py-3.5">
+      <div className="px-[18px] py-3.5">
         {pestanas}
         <div className="mb-3 flex items-start gap-2 rounded-md border border-warning-soft bg-warning-tint p-3 text-sm text-warning-text">
           <Clock3 className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={1.7} />
@@ -621,7 +623,7 @@ export function Composer({
   const soloPersona = !conversation.windowOpen && Boolean(human?.open);
 
   return withDropZone(
-    <div className="relative bg-chat px-[18px] pb-3.5 pt-2">
+    <div className="relative px-[18px] pb-3.5 pt-2">
       {pestanas}
 
       {soloPersona && (
@@ -844,7 +846,7 @@ export function Composer({
       </div>
       )}
       <div className="mt-1.5 flex items-center justify-between">
-        {error ? <p className="text-xs text-destructive">{systemText(tr.locale, error)}</p> : <span />}
+        {error ? <p role="alert" className="text-xs text-destructive">{systemText(tr.locale, error)}</p> : <span />}
         <p className="font-mono text-[10.5px] tracking-[0.04em] text-text-3">
           {soloPersona
             ? tr("Ventana humana · quedan {v0}", {v0: formatRemainingLong(human!.remainingMs, tr.locale)})

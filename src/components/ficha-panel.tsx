@@ -26,7 +26,7 @@ export function FichaPanel({
   /** Parche: solo lo que cambia. `null` borra la clave. */
   onSave: (patch: Record<string, FichaValue | null>) => Promise<void>;
 }) {
-  const { t: tr } = useI18n();
+  const { t: tr, locale } = useI18n();
 
   const [editando, setEditando] = useState<string | null>(null);
   const [borrador, setBorrador] = useState("");
@@ -44,6 +44,11 @@ export function FichaPanel({
     } finally {
       setGuardando(false);
     }
+  }
+
+  function iniciarEdicion(clave: string) {
+    setEditando(clave);
+    setBorrador(fichaValueText(ficha[clave]!, locale));
   }
 
   async function confirmarEdicion(clave: string) {
@@ -96,17 +101,20 @@ export function FichaPanel({
               <dd className="flex min-w-0 flex-1 items-start gap-1">
                 {editando === clave ? (
                   <>
-                    <Input
-                      autoFocus
-                      value={borrador}
-                      onChange={(e) => setBorrador(e.target.value)}
+                    {typeof ficha[clave] === "boolean" ? (
+                      <select autoFocus value={borrador} onChange={(e) => setBorrador(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Escape") setEditando(null); }}
+                        className="h-7 min-w-0 flex-1 rounded-md border border-input bg-background px-2 text-xs"
+                        aria-label={tr("Valor de {v0}", {v0: fichaLabel(clave)})}>
+                        <option value={locale === "pt-BR" ? "Sim" : "Sí"}>{locale === "pt-BR" ? "Sim" : "Sí"}</option>
+                        <option value={locale === "pt-BR" ? "Não" : "No"}>{locale === "pt-BR" ? "Não" : "No"}</option>
+                      </select>
+                    ) : <Input autoFocus value={borrador} onChange={(e) => setBorrador(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter") void confirmarEdicion(clave);
                         if (e.key === "Escape") setEditando(null);
-                      }}
-                      className="h-7 py-0 text-xs"
-                      aria-label={tr("Valor de {v0}", {v0: fichaLabel(clave)})}
-                    />
+                      }} className="h-7 py-0 text-xs"
+                      aria-label={tr("Valor de {v0}", {v0: fichaLabel(clave)})} />}
                     <button
                       onClick={() => void confirmarEdicion(clave)}
                       aria-label={tr("Guardar")}
@@ -127,16 +135,16 @@ export function FichaPanel({
                     <button
                       onClick={() => {
                         setEditando(clave);
-                        setBorrador(fichaValueText(valor));
+                        setBorrador(fichaValueText(valor, locale));
                       }}
                       className="min-w-0 flex-1 break-words rounded px-1 py-1 text-left hover:bg-accent"
                       aria-label={tr("Editar {v0}", {v0: fichaLabel(clave)})}
                     >
-                      {fichaValueText(valor)}
+                      {fichaValueText(valor, locale)}
                     </button>
                     <span className="flex opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
                       <button
-                        onClick={() => setEditando(clave)}
+                        onClick={() => iniciarEdicion(clave)}
                         aria-label={tr("Editar {v0}", {v0: fichaLabel(clave)})}
                         className="rounded p-1 text-text-3 hover:bg-accent hover:text-foreground"
                       >

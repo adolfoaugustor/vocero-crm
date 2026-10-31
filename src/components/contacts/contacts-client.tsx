@@ -33,7 +33,7 @@ import { NewContactDialog } from "./new-contact-dialog";
 import { StartConversation } from "./start-conversation";
 
 export function ContactsClient() {
-  const { t: tr } = useI18n();
+  const { t: tr, locale } = useI18n();
 
   const router = useRouter();
   const [contacts, setContacts] = useState<ContactDto[]>([]);
@@ -208,7 +208,7 @@ export function ContactsClient() {
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {formatPhone(c.phone)}
+                    {c.phone ? formatPhone(c.phone, locale) : tr("sin teléfono")}
                     {c.notes ? ` · ${c.notes.slice(0, 60)}` : ""}
                   </p>
                 </div>

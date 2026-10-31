@@ -18,17 +18,7 @@ import { EVENTO_BORRADOR, leerBorrador } from "@/lib/borradores";
 import { atajoBandeja, esCampoDeTexto, sirveEscribiendo, vecina } from "@/lib/atajos";
 import { hayDialogoAbierto } from "@/components/atajos-globales";
 import { etiquetaVence, porVencer } from "@/lib/filtros-bandeja";
-
-/* Puntos de etapa: los tokens del tema, no hex copiados del tema claro —
-   así siguen al acento white-label y se recalculan en oscuro. */
-const STAGE_DOT: Record<string, string> = {
-  Nuevo: "var(--text-3)",
-  "En conversación": "var(--accent)",
-  Interesado: "var(--warning)",
-  Cliente: "var(--success)",
-  Perdido: "var(--danger)",
-};
-const STAGE_DOT_FALLBACK = "var(--text-3)";
+import { stageColor } from "@/lib/stage-color";
 
 /**
  * Foco por teclado de chips y selector: el anillo de `ui/button`, acento
@@ -513,7 +503,7 @@ export function ConversationList({
                             <span
                               className="h-[7px] w-[7px] rounded-full"
                               style={{
-                                background: STAGE_DOT[c.stageName] ?? STAGE_DOT_FALLBACK,
+                                background: stageColor(c.stageName),
                               }}
                             />
                             {c.stageName}

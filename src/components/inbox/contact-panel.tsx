@@ -56,7 +56,7 @@ export function ContactPanel({
   onDeleteConversation?: (alsoContact: boolean) => Promise<string | null>;
   onClose: () => void;
 }) {
-  const { t: tr } = useI18n();
+  const { t: tr, locale } = useI18n();
 
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [notes, setNotes] = useState("");
@@ -212,7 +212,7 @@ export function ContactPanel({
                 {conversation.contact.name}
               </p>
               <p className="text-xs text-text-3">
-                {formatPhone(conversation.contact.phone)}
+                {conversation.contact.phone ? formatPhone(conversation.contact.phone, locale) : tr("sin teléfono")}
               </p>
             </div>
           </div>
